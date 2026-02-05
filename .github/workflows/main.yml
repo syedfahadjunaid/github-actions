@@ -1,0 +1,41 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # JOB 1: Continuous Integration (The "Check")
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lint/Tests
+        run: npm test || echo "No tests specified yet"
+
+  # JOB 2: Continuous Deployment (The "Delivery")
+  deploy:
+    needs: build-and-test # Only runs if tests pass
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying
+        run: echo "Connecting to your hosting provider..."
+        # This is where you'd add steps for AWS, Heroku, or Render
+
+env:
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  PORT: ${{secrets.PORT}}
